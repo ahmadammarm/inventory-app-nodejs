@@ -1,22 +1,21 @@
 /* eslint-disable prettier/prettier */
-const {validationResult} = require('express-validator');
+const { validationResult } = require('express-validator');
 
 const validate = (request, response, next) => {
-  try {
-    const errors = validationResult(request);
+    try {
+        const errors = validationResult(request);
 
-    const mappedErrors = {};
-
-    if (Object.keys(errors.errors).length !== 0) {
-      errors.errors.map(error => {
-        mappedErrors[error.path] = error.msg;
-      });
-    } else {
-      next();
+        if (!errors.isEmpty()) {
+            const mappedErrors = {};
+            errors.array().forEach(error => {
+                mappedErrors[error.path] = error.msg;
+            });
+            return response.status(400).json({ errors: mappedErrors });
+        }
+        next();
+    } catch (error) {
+        next(error);
     }
-  } catch (error) {
-    next(error);
-  }
 };
 
 module.exports = validate;
